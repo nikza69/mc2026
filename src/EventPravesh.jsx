@@ -2860,14 +2860,6 @@ function ScannerPage({ staff, eventId, onNavigate, onLogout }) {
 }
 
 function AboutPage({ onNavigate }) {
-  const teamMembers = [
-    'Chethan Vasthaw Tippani',
-    'Satyam Mishra',
-    'Giridhar reddy',
-    'Ashish Kumar',
-    'Krishnaji Mutyala'
-  ];
-
   return (
     <div className="min-h-screen bg-white py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2879,19 +2871,22 @@ function AboutPage({ onNavigate }) {
         </div>
 
         <div className="bg-gray-50 rounded-xl p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Team</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Founder</h2>
           <div className="space-y-4">
-            {teamMembers.map((member, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 p-4 bg-white rounded-lg border border-gray-200"
-              >
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-blue-600" />
-                </div>
-                <span className="text-lg font-medium text-gray-900">{member}</span>
+            <div className="flex items-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <User className="w-6 h-6 text-blue-600" />
               </div>
-            ))}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Nik Zhi An</h3>
+                <p className="text-sm font-medium text-blue-600">Founder & Lead Developer</p>
+                <p className="text-sm text-gray-600 mb-2">XMUM EventHub</p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Creator, architect, and maintainer of XMUM EventHub, responsible for platform development,
+                  ticketing infrastructure, QR validation, event management systems, and future platform expansion.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
