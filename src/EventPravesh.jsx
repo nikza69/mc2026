@@ -21,16 +21,12 @@ import {
   X,
   ChevronDown,
   AlertCircle,
-  Wallet,
 } from 'lucide-react';
-// Removed Web3 imports - using internal key generation instead
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
-
-// Blockchain functionality is handled by Supabase Edge Functions
 
 const Logo = () => (
   <img src="/logo.png" alt="EventPravesh Logo" width="32" height="32" className="rounded-md" />
@@ -408,12 +404,6 @@ function Header({ user, profile, onNavigate, onLogout }) {
                     <div className="px-4 py-2 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-900">{profile?.name}</p>
                       <p className="text-xs text-gray-500">{user.email}</p>
-                      {profile?.wallet_address && (
-                        <p className="text-xs text-blue-600 mt-1">
-                          <Wallet className="w-3 h-3 inline mr-1" />
-                          {profile.wallet_address.slice(0, 6)}...{profile.wallet_address.slice(-4)}
-                        </p>
-                      )}
                     </div>
                     <button
                       onClick={() => {
@@ -535,7 +525,7 @@ function HomePage({ onNavigate }) {
               Discover Amazing Events
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600">
-              Blockchain-powered NFT ticketing for the future of events
+              Secure QR ticketing for campus events
             </p>
           </div>
 
@@ -833,10 +823,10 @@ function EventDetailPage({ eventId, user, onNavigate }) {
               <div className="mb-4 sm:mb-6">
                 <div className="flex items-center gap-2 text-blue-600 mb-2">
                   <Ticket className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="font-semibold text-sm sm:text-base">NFT Ticket</span>
+                  <span className="font-semibold text-sm sm:text-base">Digital Ticket</span>
                 </div>
                 <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                  Your ticket will be minted as an NFT on the blockchain
+                  Your ticket will be issued with a secure QR code
                 </p>
                 
                 {/* Pricing Information */}
@@ -872,7 +862,7 @@ function EventDetailPage({ eventId, user, onNavigate }) {
                 
                 <div className="flex items-center gap-2 text-green-600 text-xs sm:text-sm">
                   <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span>Ready to mint NFT ticket</span>
+                  <span>Ready to issue digital ticket</span>
                 </div>
               </div>
 
@@ -897,7 +887,7 @@ function EventDetailPage({ eventId, user, onNavigate }) {
               )}
 
               <p className="text-xs text-gray-500 text-center mt-4">
-                Secure blockchain-powered ticketing
+                Secure QR ticketing
               </p>
             </div>
           </div>
@@ -932,7 +922,7 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
       setMinting(true);
       setError('');
 
-      // Call the backend Edge Function which handles wallet generation and NFT minting
+      // Call the backend Edge Function which handles ticket purchase.
       const result = await api.buyTicket(event.id, user.id);
       
       if (result.ticket && result.ticket.transaction_hash) {
@@ -981,20 +971,14 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
           <div className="text-center py-8">
             <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
             <p className="text-lg font-semibold text-gray-900 mb-2">Ticket Purchased Successfully!</p>
-            <p className="text-sm text-gray-600 mb-4">Your NFT ticket has been minted on the blockchain</p>
+            <p className="text-sm text-gray-600 mb-4">Your digital ticket has been issued</p>
             
             {transactionHash && (
               <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <p className="text-xs text-gray-600 mb-2">Transaction Hash:</p>
-                <a
-                  href={`https://testnet3.explorer.nexus.xyz/tx/${transactionHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-sm break-all underline"
-                >
+                <p className="text-xs text-gray-600 mb-2">Payment Reference:</p>
+                <p className="text-blue-600 text-sm break-all">
                   {transactionHash}
-                </a>
-                <p className="text-xs text-gray-500 mt-2">Click to view on Nexus Explorer</p>
+                </p>
               </div>
             )}
             
@@ -1003,8 +987,8 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
         ) : minting ? (
           <div className="text-center py-8">
             <Loader className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-            <p className="text-lg font-semibold text-gray-900">Minting your NFT ticket...</p>
-            <p className="text-sm text-gray-600 mt-2">Please wait while we create your blockchain ticket</p>
+            <p className="text-lg font-semibold text-gray-900">Issuing your digital ticket...</p>
+            <p className="text-sm text-gray-600 mt-2">Please wait while we create your secure QR ticket</p>
             <p className="text-xs text-gray-500 mt-2">This may take a few moments</p>
           </div>
         ) : (
@@ -1016,7 +1000,7 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
               </div>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-gray-600">Ticket Type</span>
-                <span className="font-semibold text-gray-900">NFT Ticket</span>
+                <span className="font-semibold text-gray-900">Digital Ticket</span>
               </div>
               <div className="border-t border-gray-200 pt-4 mt-4">
                 <div className="flex justify-between items-center">
@@ -1032,9 +1016,9 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
               <div className="flex gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-green-900 mb-1">Blockchain Powered</p>
+                  <p className="text-sm font-semibold text-green-900 mb-1">Secure QR Ticketing</p>
                   <p className="text-xs text-green-700">
-                    Your ticket will be minted as an NFT on the blockchain, ensuring authenticity and ownership.
+                    Your ticket will be issued with a secure QR code for event check-in.
                   </p>
                 </div>
               </div>
@@ -1045,7 +1029,7 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
               disabled={processing}
               className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {processing ? 'Processing...' : 'Buy NFT Ticket'}
+              {processing ? 'Processing...' : 'Buy Ticket'}
             </button>
           </>
         )}
@@ -1385,8 +1369,8 @@ function ProfilePage({ user, profile, onNavigate }) {
                     )}
                     {ticket.is_blockchain_verified && (
                       <div className="absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                        <Wallet className="w-3 h-3" />
-                        NFT
+                        <Ticket className="w-3 h-3" />
+                        Digital
                       </div>
                     )}
                   </div>
@@ -1405,22 +1389,16 @@ function ProfilePage({ user, profile, onNavigate }) {
                     {ticket.is_blockchain_verified && (
                       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <div className="flex items-center gap-2 text-blue-700 text-sm mb-1">
-                          <Wallet className="w-4 h-4" />
-                          <span className="font-medium">Blockchain Ticket</span>
+                          <Ticket className="w-4 h-4" />
+                          <span className="font-medium">Digital Ticket</span>
                         </div>
                         <p className="text-xs text-blue-600">
-                          Token ID: {ticket.token_id}
+                          Ticket Reference: {ticket.token_id}
                         </p>
                         {ticket.transaction_hash && (
-                          <a
-                            href={`https://testnet3.explorer.nexus.xyz/tx/${ticket.transaction_hash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-blue-600 hover:text-blue-800 underline truncate block"
-                            title="View transaction on Nexus Explorer"
-                          >
-                            TX: {ticket.transaction_hash.slice(0, 10)}...
-                          </a>
+                          <p className="text-xs text-blue-600 truncate block" title="Payment reference">
+                            Ref: {ticket.transaction_hash.slice(0, 10)}...
+                          </p>
                         )}
                       </div>
                     )}
@@ -2920,13 +2898,13 @@ function AboutPage({ onNavigate }) {
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">About EventPravesh</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            EventPravesh is an innovative NFT-powered event ticketing platform that combines
-            blockchain technology with modern web development to create a secure, scalable,
+            EventPravesh is an innovative event ticketing platform that combines
+            secure QR validation with modern web development to create a scalable,
             and user-friendly ticketing solution.
           </p>
           <p className="text-gray-700 leading-relaxed">
             Built for CBIT Hacktoberfest 2025, this platform demonstrates the practical
-            application of blockchain technology in solving real-world problems in the
+            application of secure ticketing technology in solving real-world problems in the
             event management industry.
           </p>
         </div>
