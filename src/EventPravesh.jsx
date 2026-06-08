@@ -29,7 +29,7 @@ const supabase = createClient(
 );
 
 const Logo = () => (
-  <img src="/logo.png" alt="EventPravesh Logo" width="32" height="32" className="rounded-md" />
+  <img src="/logo.png" alt="XMUM EventHub Logo" width="32" height="32" className="rounded-md" />
 );
 
 const api = {
@@ -365,7 +365,7 @@ function Header({ user, profile, onNavigate, onLogout }) {
           <div className="flex items-center gap-2 sm:gap-4 lg:gap-8">
             <button onClick={() => onNavigate('home')} className="flex items-center gap-1 sm:gap-2">
               <Logo />
-              <span className="text-lg sm:text-xl font-semibold text-gray-900">EventPravesh</span>
+              <span className="text-lg sm:text-xl font-semibold text-gray-900">XMUM EventHub</span>
             </button>
             
             {/* Desktop Navigation */}
@@ -466,7 +466,7 @@ function Footer({ onNavigate }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
           <p className="text-gray-600 mb-2">
-            Built by Team 412 for CBIT Hacktoberfest 2025
+            XMUM EventHub for university events and ticketing
           </p>
           <button
             onClick={() => onNavigate('about')}
@@ -1070,10 +1070,10 @@ function AuthPage({ mode, onNavigate, onAuthSuccess }) {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            {isLogin ? 'Welcome to XMUM EventHub' : 'Create XMUM EventHub Account'}
           </h1>
           <p className="text-gray-600">
-            {isLogin ? 'Sign in to your account' : 'Join EventPravesh today'}
+            {isLogin ? 'Sign in to XMUM EventHub' : 'Join XMUM EventHub today'}
           </p>
         </div>
 
@@ -2872,9 +2872,9 @@ function AboutPage({ onNavigate }) {
     <div className="min-h-screen bg-white py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Built by Team 412</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">XMUM EventHub</h1>
           <p className="text-xl text-gray-600">
-            A project for CBIT Hacktoberfest 2025
+            University events and ticketing for XMUM
           </p>
         </div>
 
@@ -2896,14 +2896,14 @@ function AboutPage({ onNavigate }) {
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">About EventPravesh</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">About XMUM EventHub</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            EventPravesh is an innovative event ticketing platform that combines
+            XMUM EventHub is an innovative event ticketing platform that combines
             secure QR validation with modern web development to create a scalable,
             and user-friendly ticketing solution.
           </p>
           <p className="text-gray-700 leading-relaxed">
-            Built for CBIT Hacktoberfest 2025, this platform demonstrates the practical
+            Built for XMUM, this platform demonstrates the practical
             application of secure ticketing technology in solving real-world problems in the
             event management industry.
           </p>
