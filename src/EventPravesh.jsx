@@ -277,11 +277,22 @@ const api = {
     return data;
   },
 
-  async buyTicket(eventId, userId) {
+  async buyTicket(eventId, userId, ticketType, attendee) {
     const { data, error } = await supabase.functions.invoke('buy-ticket', {
-      body: { eventId, userId, timestamp: Date.now() }
+      body: { eventId, userId, ticketType, attendee, timestamp: Date.now() }
     });
-    if (error) throw error;
+    if (error) {
+      if (error.context) {
+        try {
+          const errorBody = await error.context.json();
+          throw new Error(errorBody.error || errorBody.message || error.message);
+        } catch (parseError) {
+          if (parseError.message) throw parseError;
+        }
+      }
+      throw error;
+    }
+    if (data?.error) throw new Error(data.error);
     return data;
   },
 
@@ -915,15 +926,52 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
   const [error, setError] = useState('');
   const [transactionHash, setTransactionHash] = useState('');
   const [success, setSuccess] = useState(false);
+  const [ticketType, setTicketType] = useState('Normal');
+  const [attendee, setAttendee] = useState({
+    fullName: '',
+    studentId: '',
+    icOrPassport: '',
+    phoneNumber: '',
+    studentType: 'xmum_student'
+  });
+
+  const getTicketPrice = (type) => {
+    if (type === 'VIP') {
+      return Number(event.vip_price || 0);
+    }
+    return Number(event.normal_price || event.ticket_price || 0);
+  };
+
+  const selectedPrice = getTicketPrice(ticketType);
+  const updateAttendee = (field, value) => {
+    setAttendee((current) => ({ ...current, [field]: value }));
+  };
+  const isAttendeeValid =
+    attendee.fullName.trim() &&
+    attendee.icOrPassport.trim() &&
+    attendee.phoneNumber.trim() &&
+    attendee.studentType &&
+    (attendee.studentType !== 'xmum_student' || attendee.studentId.trim());
 
   const handleBuyTicket = async () => {
+    if (!isAttendeeValid) {
+      setError('Please complete all required attendee information');
+      return;
+    }
+
     try {
       setProcessing(true);
       setMinting(true);
       setError('');
 
       // Call the backend Edge Function which handles ticket purchase.
-      const result = await api.buyTicket(event.id, user.id);
+      const result = await api.buyTicket(event.id, user.id, ticketType, {
+        fullName: attendee.fullName.trim(),
+        studentId: attendee.studentId.trim(),
+        icOrPassport: attendee.icOrPassport.trim(),
+        phoneNumber: attendee.phoneNumber.trim(),
+        studentType: attendee.studentType
+      });
       
       if (result.ticket && result.ticket.transaction_hash) {
         setTransactionHash(result.ticket.transaction_hash);
@@ -1000,13 +1048,121 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
               </div>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-gray-600">Ticket Type</span>
-                <span className="font-semibold text-gray-900">Digital Ticket</span>
+                <span className="font-semibold text-gray-900">{ticketType}</span>
+              </div>
+              <div className="space-y-3 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setTicketType('Normal')}
+                  disabled={processing}
+                  className={`w-full flex items-center justify-between p-3 border rounded-lg text-left ${
+                    ticketType === 'Normal'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="font-medium text-gray-900">Normal</span>
+                  <span className="font-semibold text-blue-600">
+                    {event.is_free ? 'Free' : `₹${getTicketPrice('Normal')}`}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTicketType('VIP')}
+                  disabled={processing}
+                  className={`w-full flex items-center justify-between p-3 border rounded-lg text-left ${
+                    ticketType === 'VIP'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="font-medium text-gray-900">VIP</span>
+                  <span className="font-semibold text-blue-600">
+                    {event.is_free ? 'Free' : `₹${getTicketPrice('VIP')}`}
+                  </span>
+                </button>
+              </div>
+              <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
+                <h3 className="font-semibold text-gray-900">Attendee Information</h3>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={attendee.fullName}
+                    onChange={(e) => updateAttendee('fullName', e.target.value)}
+                    disabled={processing}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Full name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Student Type
+                  </label>
+                  <select
+                    value={attendee.studentType}
+                    onChange={(e) => updateAttendee('studentType', e.target.value)}
+                    disabled={processing}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="xmum_student">XMUM Student</option>
+                    <option value="non_xmum_student">Non-XMUM Student</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Student ID {attendee.studentType === 'non_xmum_student' && (
+                      <span className="text-gray-400 font-normal">(Optional)</span>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    value={attendee.studentId}
+                    onChange={(e) => updateAttendee('studentId', e.target.value)}
+                    disabled={processing}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Student ID"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    IC / Passport
+                  </label>
+                  <input
+                    type="text"
+                    value={attendee.icOrPassport}
+                    onChange={(e) => updateAttendee('icOrPassport', e.target.value)}
+                    disabled={processing}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="IC or passport number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={attendee.phoneNumber}
+                    onChange={(e) => updateAttendee('phoneNumber', e.target.value)}
+                    disabled={processing}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="+60123456789"
+                  />
+                </div>
               </div>
               <div className="border-t border-gray-200 pt-4 mt-4">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-blue-600">
-                    {event.is_free ? 'Free' : `₹${event.ticket_price || 0}`}
+                    {event.is_free ? 'Free' : `₹${selectedPrice}`}
                   </span>
                 </div>
               </div>
@@ -1026,7 +1182,7 @@ function PaymentModal({ event, user, onClose, onSuccess }) {
 
             <button
               onClick={handleBuyTicket}
-              disabled={processing}
+              disabled={processing || !isAttendeeValid}
               className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {processing ? 'Processing...' : 'Buy Ticket'}
@@ -1378,6 +1534,9 @@ function ProfilePage({ user, profile, onNavigate }) {
                     <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                       {ticket.events.title}
                     </h3>
+                    <div className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold mb-3">
+                      {ticket.ticket_type || 'Normal'}
+                    </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                       <Calendar className="w-4 h-4" />
                       <span>{formatDate(ticket.events.date)}</span>
@@ -1455,6 +1614,7 @@ function TicketModal({ ticket, onClose }) {
 
         <div className="text-center mb-6">
           <h3 className="font-semibold text-gray-900 mb-2">{ticket.events.title}</h3>
+          <p className="text-sm font-medium text-blue-600 mb-1">{ticket.ticket_type || 'Normal'}</p>
           <p className="text-sm text-gray-600">{new Date(ticket.events.date).toLocaleDateString()}</p>
         </div>
 
